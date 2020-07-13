@@ -23,7 +23,6 @@ module.exports = (io) => {
     });
 
     function updateClient() {
-      console.log(new Date(), "updateClient()");
       Url.find({})
         .sort({ createdAt: -1 })
         .exec((err, urls) => {
@@ -38,6 +37,8 @@ module.exports = (io) => {
       .then((response) => {
         const $ = cheerio.load(response.data);
         let imgs_url = [];
+        url = new URL(url);
+        url = `${url.protocol}//${url.hostname}`;
         var newUrl = new Url({ url });
         $("img").each((i, elem) => {
           let src = $(elem).attr("src");
@@ -52,22 +53,25 @@ module.exports = (io) => {
             method: "get",
             url: remoteFile,
             responseType: "stream",
-          }).then(function (imgStream) {
-            imgStream.data.pipe(
-              fs.createWriteStream(`${ROOT}/public/${localFile}`)
-            );
-          });
-          newUrl.images.push({
-            fileName,
-            localFile,
-            remoteFile,
-          });
+          })
+            .then(function (imgStream) {
+              imgStream.data.pipe(
+                fs.createWriteStream(`${ROOT}/public/${localFile}`)
+              );
+              newUrl.images.push({
+                fileName,
+                localFile,
+                remoteFile,
+              });
+              newUrl.save(cb);
+            })
+            .catch((error) => {
+              // console.log(error);
+            });
         });
-        newUrl.save(cb);
-        console.log(newUrl);
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
       });
   }
 };
