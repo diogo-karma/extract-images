@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  #app(v-cloak)
+    h1.text-center= title
+    .row
+      .col-2 &nbsp;
+      .col-8
+        form.form(v-if="!loading", v-on:submit.prevent)
+          .form-group
+            input.form-control(v-on:keyup.enter="extract" v-model="url", type="search", placeholder="URL")
+          button.btn.btn-primary(v-on:click="extract")
+              | Extrair images
+        div#loading.alert.alert-warning(v-if="loading", role="alert")
+            | Processando...Aguarde...
+      .col-2 &nbsp;
+    hr
+    table.table.table-striped
+      thead.thead-dark
+        tr
+          th(scope="col") Urls
+            span.badge.badge-pill.badge-secondary
+              | {{ urls.length}}
+      tbody
+        tr(v-for="url in urls")
+          td(scope="row")
+            strong {{ url.url }}
+            span.badge.badge-pill.badge-primary {{ url.images.length }}
+            ul.img-list
+              li.img(v-for="img in url.images")
+                a(target="_blank", v-bind:href="img.localFile") {{ img.fileName }}
+    
+          
